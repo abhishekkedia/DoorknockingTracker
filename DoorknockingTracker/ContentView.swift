@@ -188,6 +188,7 @@ struct Property: Identifiable, Codable {
     }
 }
 
+// comment added
 // MARK: - Location Manager
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
