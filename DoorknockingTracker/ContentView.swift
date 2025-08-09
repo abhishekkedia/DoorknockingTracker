@@ -2,6 +2,7 @@ import SwiftUI
 import CoreLocation
 import MapKit
 
+// Testing this change
 // MARK: - Activity Data Models
 struct ActivityRecord: Identifiable, Codable {
     let recordID: UUID
