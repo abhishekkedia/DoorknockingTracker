@@ -1,6 +1,393 @@
 import SwiftUI
 import CoreLocation
 import MapKit
+import GoogleSignIn
+import GoogleSignInSwift
+
+// User model for authenticated user
+struct AppUser: Codable {
+    let id: String
+    let email: String
+    let name: String
+    let profileImageURL: String?
+    
+    init(from gidUser: GIDGoogleUser) {
+        self.id = gidUser.userID ?? ""
+        self.email = gidUser.profile?.email ?? ""
+        self.name = gidUser.profile?.name ?? ""
+        self.profileImageURL = gidUser.profile?.imageURL(withDimension: 100)?.absoluteString
+    }
+}
+
+class AuthenticationManager: ObservableObject {
+    @Published var isSignedIn = false
+    @Published var currentUser: AppUser?
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+    
+    private let userDefaults = UserDefaults.standard
+    private let userKey = "SavedUser"
+    
+    init() {
+        loadSavedUser()
+        checkCurrentSignInStatus()
+    }
+    
+    // MARK: - Configuration
+    func configureGoogleSignIn() {
+        guard let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+              let plist = NSDictionary(contentsOfFile: path),
+              let clientId = plist["CLIENT_ID"] as? String else {
+            print("❌ Could not find GoogleService-Info.plist or CLIENT_ID")
+            return
+        }
+        
+        let configuration = GIDConfiguration(clientID: clientId)
+        GIDSignIn.sharedInstance.configuration = configuration
+    }
+    
+    // MARK: - Sign In
+    func signIn() {
+        guard let presentingViewController = UIApplication.shared.windows.first?.rootViewController else {
+            errorMessage = "Could not find presenting view controller"
+            return
+        }
+        
+        isLoading = true
+        errorMessage = nil
+        
+        GIDSignIn.sharedInstance.signIn(withPresenting: presentingViewController) { [weak self] result, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                if let error = error {
+                    self?.errorMessage = "Sign in failed: \(error.localizedDescription)"
+                    return
+                }
+                
+                guard let user = result?.user else {
+                    self?.errorMessage = "Failed to get user information"
+                    return
+                }
+                
+                let appUser = AppUser(from: user)
+                self?.currentUser = appUser
+                self?.isSignedIn = true
+                self?.saveUser(appUser)
+                
+                print("✅ Successfully signed in: \(appUser.name)")
+            }
+        }
+    }
+    
+    // MARK: - Sign Out
+    func signOut() {
+        GIDSignIn.sharedInstance.signOut()
+        isSignedIn = false
+        currentUser = nil
+        clearSavedUser()
+        print("✅ Successfully signed out")
+    }
+    
+    // MARK: - Restore Previous Session
+    func restorePreviousSignIn() {
+        guard GIDSignIn.sharedInstance.hasPreviousSignIn() else {
+            print("📝 No previous sign in found")
+            return
+        }
+        
+        isLoading = true
+        
+        GIDSignIn.sharedInstance.restorePreviousSignIn { [weak self] user, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                if let error = error {
+                    print("❌ Failed to restore sign in: \(error.localizedDescription)")
+                    self?.clearSavedUser()
+                    return
+                }
+                
+                guard let user = user else {
+                    print("❌ No user found during restore")
+                    self?.clearSavedUser()
+                    return
+                }
+                
+                let appUser = AppUser(from: user)
+                self?.currentUser = appUser
+                self?.isSignedIn = true
+                self?.saveUser(appUser)
+                
+                print("✅ Successfully restored sign in: \(appUser.name)")
+            }
+        }
+    }
+    
+    // MARK: - Private Methods
+    private func checkCurrentSignInStatus() {
+        if GIDSignIn.sharedInstance.hasPreviousSignIn() {
+            restorePreviousSignIn()
+        }
+    }
+    
+    private func saveUser(_ user: AppUser) {
+        do {
+            let encoded = try JSONEncoder().encode(user)
+            userDefaults.set(encoded, forKey: userKey)
+        } catch {
+            print("❌ Failed to save user: \(error)")
+        }
+    }
+    
+    private func loadSavedUser() {
+        guard let data = userDefaults.data(forKey: userKey) else { return }
+        
+        do {
+            currentUser = try JSONDecoder().decode(AppUser.self, from: data)
+        } catch {
+            print("❌ Failed to load saved user: \(error)")
+            clearSavedUser()
+        }
+    }
+    
+    private func clearSavedUser() {
+        userDefaults.removeObject(forKey: userKey)
+        currentUser = nil
+    }
+}
+
+// MARK: - Sign In View
+struct SignInView: View {
+    @ObservedObject var authManager: AuthenticationManager
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            Spacer()
+            
+            // App Logo/Icon Area
+            VStack(spacing: 20) {
+                Image(systemName: "house.and.flag.fill")
+                    .font(.system(size: 80))
+                    .foregroundColor(.blue)
+                
+                Text("Doorknocking Tracker")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                
+                Text("Track your doorknocking activities with precision")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
+            
+            Spacer()
+            
+            // Sign In Section
+            VStack(spacing: 20) {
+                Text("Sign in to get started")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                
+                if authManager.isLoading {
+                    ProgressView("Signing in...")
+                        .frame(height: 50)
+                } else {
+                    // Google Sign In Button
+                    Button(action: {
+                        authManager.signIn()
+                    }) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "person.circle.fill")
+                                .font(.title2)
+                            
+                            Text("Sign in with Google")
+                                .font(.headline)
+                                .fontWeight(.medium)
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [.blue, .blue.opacity(0.8)]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(12)
+                        .shadow(color: .blue.opacity(0.3), radius: 5, x: 0, y: 2)
+                    }
+                    .padding(.horizontal, 40)
+                }
+                
+                // Error Message
+                if let errorMessage = authManager.errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.caption)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                }
+            }
+            
+            Spacer()
+            
+            // Privacy Note
+            Text("Your data is stored securely and never shared without permission")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+                .padding(.bottom, 20)
+        }
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.blue.opacity(0.05), Color.white]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+    }
+}
+
+// MARK: - User Profile View
+struct UserProfileView: View {
+    let user: AppUser
+    let onSignOut: () -> Void
+    @State private var showingSignOutAlert = false
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            // Profile Header
+            VStack(spacing: 12) {
+                // Profile Image
+                AsyncImage(url: URL(string: user.profileImageURL ?? "")) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Image(systemName: "person.circle.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.gray)
+                }
+                .frame(width: 80, height: 80)
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(Color.blue, lineWidth: 3)
+                )
+                
+                // User Info
+                VStack(spacing: 4) {
+                    Text(user.name)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                    
+                    Text(user.email)
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            Divider()
+                .padding(.vertical)
+            
+            // Sign Out Button
+            Button(action: {
+                showingSignOutAlert = true
+            }) {
+                HStack {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                        .foregroundColor(.red)
+                    Text("Sign Out")
+                        .foregroundColor(.red)
+                        .fontWeight(.medium)
+                    Spacer()
+                }
+                .padding()
+                .background(Color.red.opacity(0.1))
+                .cornerRadius(10)
+            }
+            
+            Spacer()
+        }
+        .padding()
+        .alert("Sign Out", isPresented: $showingSignOutAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Sign Out", role: .destructive) {
+                onSignOut()
+            }
+        } message: {
+            Text("Are you sure you want to sign out?")
+        }
+    }
+}
+
+// MARK: - Updated RootAppView
+struct RootAppView: View {
+    @StateObject private var authManager = AuthenticationManager()
+    
+    var body: some View {
+        Group {
+            if authManager.isSignedIn && authManager.currentUser != nil {
+                // Pass authManager to ContentView
+                ContentViewWithSignOut(authManager: authManager)
+            } else {
+                SignInView(authManager: authManager)
+            }
+        }
+        .onAppear {
+            authManager.configureGoogleSignIn()
+        }
+    }
+}
+
+// MARK: - ContentView Wrapper with Sign Out Button
+struct ContentViewWithSignOut: View {
+    @ObservedObject var authManager: AuthenticationManager
+    @State private var showingSignOutAlert = false
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Your main content
+            ContentView()
+            
+            // Sign out button at bottom
+            VStack(spacing: 0) {
+                Divider()
+                
+                Button(action: {
+                    showingSignOutAlert = true
+                }) {
+                    HStack {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                        Text("Sign Out")
+                        Spacer()
+                        if let user = authManager.currentUser {
+                            Text(user.name)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .foregroundColor(.red)
+                    .padding()
+                    .background(Color.gray.opacity(0.05))
+                }
+            }
+        }
+        .alert("Sign Out", isPresented: $showingSignOutAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Sign Out", role: .destructive) {
+                authManager.signOut()
+            }
+        } message: {
+            Text("Are you sure you want to sign out? Your data will remain on this device.")
+        }
+    }
+}
+
 
 // Testing this change
 // MARK: - Activity Data Models
@@ -206,7 +593,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.distanceFilter = 10 // Update every 10 meters
+        locationManager.distanceFilter = 5 // Update every 10 meters
     }
     
     func requestLocation() {

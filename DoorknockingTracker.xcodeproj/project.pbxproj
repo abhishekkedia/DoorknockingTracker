@@ -6,6 +6,14 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C4F80E5E2E56435100949CA0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4F80E5D2E56435100949CA0 /* GoogleService-Info.plist */; };
+		C4F80E5F2E56435100949CA0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4F80E5D2E56435100949CA0 /* GoogleService-Info.plist */; };
+		C4F80E602E56435100949CA0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4F80E5D2E56435100949CA0 /* GoogleService-Info.plist */; };
+		C4F80E642E56459900949CA0 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C4F80E632E56459900949CA0 /* GoogleSignIn */; };
+		C4F80E662E56459900949CA0 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C4F80E652E56459900949CA0 /* GoogleSignInSwift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C4384F342DE79CA500A50A3A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +35,7 @@
 		C4384F262DE79CA400A50A3A /* DoorknockingTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoorknockingTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4384F332DE79CA500A50A3A /* DoorknockingTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoorknockingTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4384F3D2DE79CA500A50A3A /* DoorknockingTrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoorknockingTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4F80E5D2E56435100949CA0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -44,12 +53,20 @@
 			);
 			target = C4384F3C2DE79CA500A50A3A /* DoorknockingTrackerUITests */;
 		};
+		C4F80E622E56440400949CA0 /* Exceptions for "DoorknockingTracker" folder in "DoorknockingTracker" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C4384F252DE79CA400A50A3A /* DoorknockingTracker */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C4384F282DE79CA400A50A3A /* DoorknockingTracker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				C4F80E622E56440400949CA0 /* Exceptions for "DoorknockingTracker" folder in "DoorknockingTracker" target */,
 				C4DF8F582DFE3F39005E7111 /* Exceptions for "DoorknockingTracker" folder in "DoorknockingTrackerTests" target */,
 				C4DF8F592DFE3F39005E7111 /* Exceptions for "DoorknockingTracker" folder in "DoorknockingTrackerUITests" target */,
 			);
@@ -73,6 +90,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C4F80E642E56459900949CA0 /* GoogleSignIn in Frameworks */,
+				C4F80E662E56459900949CA0 /* GoogleSignInSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,6 +119,7 @@
 				C4384F362DE79CA500A50A3A /* DoorknockingTrackerTests */,
 				C4384F402DE79CA500A50A3A /* DoorknockingTrackerUITests */,
 				C4384F272DE79CA400A50A3A /* Products */,
+				C4F80E5D2E56435100949CA0 /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -133,6 +153,8 @@
 			);
 			name = DoorknockingTracker;
 			packageProductDependencies = (
+				C4F80E632E56459900949CA0 /* GoogleSignIn */,
+				C4F80E652E56459900949CA0 /* GoogleSignInSwift */,
 			);
 			productName = DoorknockingTracker;
 			productReference = C4384F262DE79CA400A50A3A /* DoorknockingTracker.app */;
@@ -216,6 +238,9 @@
 			);
 			mainGroup = C4384F1D2DE79CA400A50A3A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C4AF85FB2E4DC39300EEFB9C /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C4384F272DE79CA400A50A3A /* Products */;
 			projectDirPath = "";
@@ -233,6 +258,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C4F80E602E56435100949CA0 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,6 +266,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C4F80E5F2E56435100949CA0 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -247,6 +274,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C4F80E5E2E56435100949CA0 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -419,6 +447,7 @@
 				DEVELOPMENT_TEAM = U9G32FX3JZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DoorknockingTracker/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This app needs location access to identify properties you're standing in front of.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -449,6 +478,7 @@
 				DEVELOPMENT_TEAM = U9G32FX3JZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DoorknockingTracker/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This app needs location access to identify properties you're standing in front of.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -581,6 +611,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C4AF85FB2E4DC39300EEFB9C /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C4F80E632E56459900949CA0 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C4AF85FB2E4DC39300EEFB9C /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		C4F80E652E56459900949CA0 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C4AF85FB2E4DC39300EEFB9C /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C4384F1E2DE79CA400A50A3A /* Project object */;
 }
