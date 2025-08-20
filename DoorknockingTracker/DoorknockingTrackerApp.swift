@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+import GoogleSignIn
 
 @main
-struct DoorknockingTrackerApp: App {
+struct DoorknockingTracker: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootAppView()
+                .onOpenURL { url in
+                    GIDSignIn.sharedInstance.handle(url)
+                }
         }
     }
 }
