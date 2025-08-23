@@ -4,6 +4,7 @@ import MapKit
 import GoogleSignIn
 import GoogleSignInSwift
 
+
 // User model for authenticated user
 struct AppUser: Codable {
     let id: String
